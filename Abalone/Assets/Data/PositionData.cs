@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
 
+//used as Data_struct
 public class PositionData : MonoBehaviour {
 
     public uint ID;
@@ -13,14 +14,4 @@ public class PositionData : MonoBehaviour {
     public PositionData Left;
     public PositionData RightUp;
     public PositionData LeftUp;
-
-    // Use this for initialization
-    void Start () {
-	
-	}
-	
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

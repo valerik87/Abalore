@@ -4,7 +4,7 @@ using System.Collections;
 public class BallData : MonoBehaviour {
 
     public uint ID;
-    public uint Player;
+    public E_Player Player;
     public PositionData Position;
 
 	// Use this for initialization
