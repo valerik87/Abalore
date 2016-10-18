@@ -104,7 +104,7 @@ GameObject:
   - 114: {fileID: 9776329}
   m_Layer: 0
   m_Name: Position 01
-  m_TagString: Tile
+  m_TagString: TILE
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -213,7 +213,7 @@ GameObject:
   - 114: {fileID: 454165025}
   m_Layer: 0
   m_Name: Position 00
-  m_TagString: Tile
+  m_TagString: TILE
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

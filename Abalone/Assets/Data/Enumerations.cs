@@ -2,11 +2,7 @@
 using System.Collections;
 using System;
 
-public enum E_GameState
-{
-    IDLE,
-    DRAG
-}
+
 
 public enum E_Tags
 {
