@@ -66,7 +66,14 @@ public class MouseManager : SceneSingleton
                 if (ge.CompareTag(E_Tags.BALL.ToString()))
                 {
                     BallData ball = ge.GetComponent<BallData>();
-                    GameLogic.BallSelectedInIdle(ball);
+                    if(ball)
+                    {
+                        GameLogic.BallSelectedInIdle(ball);
+                    }
+                    else
+                    {
+                        Log.Text("BallData doesn't exist while selecting a ball in IDLE",E_LogContext.MOUSE_MANAGER);
+                    }
                 }
 
                 break;
@@ -74,9 +81,27 @@ public class MouseManager : SceneSingleton
                 if (ge.CompareTag(E_Tags.TILE.ToString()))
                 {
                     PositionData tile = ge.GetComponent<PositionData>();
-                    GameLogic.MouseDraggingOverTile(tile);
+                    if(tile)
+                    {
+                        GameLogic.MouseDraggingOverTile(tile);
+                    }
+                    else
+                    {
+                        Log.Text("PositionData doesn't exist", E_LogContext.MOUSE_MANAGER);
+                    }
                 }
-
+                else if (ge.CompareTag(E_Tags.BALL.ToString()))
+                {
+                    BallData ball = ge.GetComponent<BallData>();
+                    if (ball)
+                    {
+                        GameLogic.MouseDraggingOverBall(ball);
+                    }
+                    else
+                    {
+                        Log.Text("BallData doesn't exist while mouse over a ball in DRAG", E_LogContext.MOUSE_MANAGER);
+                    }
+                }
                 break;
             default:
                 break;
@@ -85,7 +110,7 @@ public class MouseManager : SceneSingleton
 
     void MouseUpOn(GameObject ge)
     {
-        Debug.Log("Clicked up on: " + ge.name);
+        Log.Text("Clicked up on: " + ge.name, E_LogContext.MOUSE_MANAGER);
         switch (GameLogic.GetGameState())
         {
             case (E_GameState.DRAG):
@@ -93,7 +118,26 @@ public class MouseManager : SceneSingleton
                 if (ge.CompareTag(E_Tags.TILE.ToString()))
                 {
                     PositionData tile = ge.GetComponent<PositionData>();
-                    GameLogic.BallDeselectedOnTile(tile);
+                    if(tile)
+                    {
+                        GameLogic.BallDeselectedOnTile(tile);
+                    }
+                    else
+                    {
+                        Log.Text("TileData doesn't exist while mouse release over a tile in DRAG", E_LogContext.MOUSE_MANAGER);
+                    }
+                }
+                else if (ge.CompareTag(E_Tags.BALL.ToString()))
+                {
+                    BallData ball = ge.GetComponent<BallData>();
+                    if (ball)
+                    {
+                        GameLogic.BallDeselectedOnBall(ball);
+                    }
+                    else
+                    {
+                        Log.Text("BallData doesn't exist while mouse release over a ball in DRAG", E_LogContext.MOUSE_MANAGER);
+                    }
                 }
 
                 break;
@@ -107,11 +151,11 @@ public class MouseManager : SceneSingleton
         switch (GameLogic.GetGameState())
         {
             case (E_GameState.DRAG):
-                Debug.Log("Mouse Released while dragging ball");
+                Log.Text("Mouse Released while dragging ball", E_LogContext.MOUSE_MANAGER);
                 GameLogic.BallDeselectedOnNothing();
                 break;
             default:
-                Debug.Log("Mouse Released");
+                Log.Text("Mouse Released", E_LogContext.MOUSE_MANAGER);
                 break;
         }
     }

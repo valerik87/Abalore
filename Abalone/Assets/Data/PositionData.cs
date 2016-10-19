@@ -41,13 +41,24 @@ public class PositionData : MonoBehaviour {
         m_oBallData = inBallData;
     }
 
-    public void OnMouseOverDragging()
+    public void OnMouseOverDraggingOK()
     {
         GetComponent<SpriteRenderer>().material.color = Color.green;
+    }
+    public void OnMouseOverDraggingNO()
+    {
+        GetComponent<SpriteRenderer>().material.color = Color.red;
     }
 
     public void OnMouseExit()
     {
+        ResetColor();
+    }
+
+
+    public void ResetColor()
+    {
         GetComponent<SpriteRenderer>().material.color = m_oOriginalColor;
     }
+    
 }

@@ -7,7 +7,7 @@ public class BallDrag : MonoBehaviour {
 
     public void StartDrag()
     {
-        Debug.Log("Start dragging ball : " + name);
+        Log.Text("Start dragging ball : " + name,E_LogContext.BALL);
         OldPosition = this.transform.position;
         GetComponent<Collider2D>().enabled = false;
         this.enabled = true;
@@ -20,7 +20,7 @@ public class BallDrag : MonoBehaviour {
 
     public void StopDrag()
     {
-        Debug.Log("Stop dragging ball : " + name);
+        Log.Text("Stop dragging ball : " + name, E_LogContext.BALL);
         BallData ballData = GetComponent<BallData>();
         if (ballData != null)
         {
@@ -34,13 +34,13 @@ public class BallDrag : MonoBehaviour {
             {
                 this.transform.position = new Vector3(OldPosition.x, OldPosition.y, this.transform.position.z);
                 Reset();
-                Debug.Log("StopDrag(): no position data");
+                Log.Text("StopDrag(): no position data", E_LogContext.BALL);
 
             }
         }
         else
         {
-            Debug.Log("StopDrag(): no ball data");
+            Log.Text("StopDrag(): no ball data", E_LogContext.BALL);
         }
     }
 
