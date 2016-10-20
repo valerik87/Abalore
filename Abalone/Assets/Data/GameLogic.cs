@@ -78,7 +78,7 @@ public class GameLogic : SceneSingleton {
             oldPositionData.SetBallOn(null);
 
             inTile.SetBallOn(m_oDraggedBall);
-            inTile.GetBallOn().SetPositionData(inTile);
+            inTile.HasBallOn().SetPositionData(inTile);
 
             BallDrag drag = m_oDraggedBall.GetComponent<BallDrag>();
             if (drag != null)
@@ -174,7 +174,7 @@ public class GameLogic : SceneSingleton {
             )
         {
             //Tile is empty
-            if (inTile.GetBallOn() == null)
+            if (inTile.HasBallOn() == null)
             {
                 return true;
             }

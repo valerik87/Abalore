@@ -7,7 +7,8 @@ public enum E_LogContext
 {
     MOUSE_MANAGER,
     GAME_LOGIC,
-    BALL
+    BALL,
+    TILE
 }
 
 public class Log : SceneSingleton {
