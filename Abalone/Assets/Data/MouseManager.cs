@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System;
 
 public class MouseManager : SceneSingleton
 {
@@ -48,6 +49,10 @@ public class MouseManager : SceneSingleton
                 GameObject ge = hit.collider.gameObject;
                 MouseDownOn(ge);
             }
+            else
+            {
+                MouseUpOnNothing();
+            }
         }
     }
 
@@ -71,6 +76,7 @@ public class MouseManager : SceneSingleton
                 }
 
                 break;
+            case (E_GameState.PUSHING):
             case (E_GameState.DRAG):
                 if (ge.CompareTag(E_Tags.TILE.ToString()))
                 {
@@ -81,7 +87,7 @@ public class MouseManager : SceneSingleton
                     }
                     else
                     {
-                        Log.Text("PositionData doesn't exist", E_LogContext.MOUSE_MANAGER);
+                        Log.Error("PositionData doesn't exist");
                     }
                 }
                 else if (ge.CompareTag(E_Tags.BALL.ToString()))
@@ -107,8 +113,8 @@ public class MouseManager : SceneSingleton
         Log.Text("Clicked up on: " + ge.name, E_LogContext.MOUSE_MANAGER);
         switch (GameLogic.GetGameState())
         {
+            case (E_GameState.PUSHING):
             case (E_GameState.DRAG):
-
                 if (ge.CompareTag(E_Tags.TILE.ToString()))
                 {
                     PositionData tile = ge.GetComponent<PositionData>();
@@ -132,9 +138,9 @@ public class MouseManager : SceneSingleton
                     {
                         Log.Text("BallData doesn't exist while mouse release over a ball in DRAG", E_LogContext.MOUSE_MANAGER);
                     }
-                }
-
+                }     
                 break;
+            
             default:
                 break;
         }
@@ -144,12 +150,27 @@ public class MouseManager : SceneSingleton
     {
         switch (GameLogic.GetGameState())
         {
+            case (E_GameState.PUSHING):
             case (E_GameState.DRAG):
                 Log.Text("Mouse Released while dragging ball", E_LogContext.MOUSE_MANAGER);
                 GameLogic.BallDeselectedOnNothing();
                 break;
             default:
-                Log.Text("Mouse Released", E_LogContext.MOUSE_MANAGER);
+                break;
+        }
+        Log.Text("Mouse Released", E_LogContext.MOUSE_MANAGER);
+    }
+
+    void MouseUpOnNothing()
+    {
+        switch (GameLogic.GetGameState())
+        {
+            case (E_GameState.PUSHING):
+            case (E_GameState.DRAG):
+                Log.Text("Mouse Up On Nothing while pushing ball", E_LogContext.MOUSE_MANAGER);
+                GameLogic.BallDraggingOnNothing();
+                break;
+            default:
                 break;
         }
     }

@@ -10,6 +10,7 @@ public class BallData : MonoBehaviour {
 
     #region private
     private PositionData m_oPositionData;
+    private E_Player m_oPlayer;
     #endregion
 
 
@@ -28,5 +29,16 @@ public class BallData : MonoBehaviour {
     {
         m_oPositionData = inPosData;
     }
+
+    public E_Player GetPlayer()
+    {
+        return m_oPlayer;
+    }
+
+    public void SetPlayer(E_Player newPlayer)
+    {
+        m_oPlayer = newPlayer;
+    }
+
 
 }

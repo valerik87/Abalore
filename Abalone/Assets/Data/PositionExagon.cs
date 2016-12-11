@@ -19,6 +19,8 @@ public class PositionExagon : PositionData {
 
     void Awake()
     {
+        InnerAwake();
+
         if (LeftDown)
         {
             m_vNeighbors.Add(LeftDown);

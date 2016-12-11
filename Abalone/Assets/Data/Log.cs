@@ -8,7 +8,8 @@ public enum E_LogContext
     MOUSE_MANAGER,
     GAME_LOGIC,
     BALL,
-    TILE
+    TILE,
+    PUSH_FORCE
 }
 
 public class Log : SceneSingleton {
@@ -39,6 +40,12 @@ public class Log : SceneSingleton {
     public static void Text(string inText,E_LogContext inContext)
     {
         if(m_vLogContext != null && m_vLogContext.Count > 0 && m_vLogContext.Contains(inContext)) Debug.Log(inText);
+    }
+
+
+    public static void Error(string inError)
+    {
+        Debug.LogError(inError);
     }
 }
 

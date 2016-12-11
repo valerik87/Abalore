@@ -13,7 +13,6 @@ public class MapManager : SceneSingleton {
 
     public override void InternalAwake()
     {
-        throw new NotImplementedException();
     }
 	
 	// Update is called once per frame

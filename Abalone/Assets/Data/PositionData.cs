@@ -16,7 +16,8 @@ public abstract class PositionData : MonoBehaviour {
     private Color m_oOriginalColor;
     protected List<PositionData> m_vNeighbors;
 
-    void Awake()
+    //Called by derived class: example PositionExagon.cs
+    protected void InnerAwake()
     {
         m_oBallData = BallOn;
         m_oOriginalColor = GetComponent<SpriteRenderer>().material.color;
@@ -30,13 +31,13 @@ public abstract class PositionData : MonoBehaviour {
 
     public abstract PositionData GetOppositeTileOf(PositionData inTileOrigin);
 
-    public BallData HasBallOn()
-    {
-        return m_oBallData;
-    }
     public void SetBallOn(BallData inBallData)
     {
         m_oBallData = inBallData;
+    }
+    public BallData GetBallOn()
+    {
+        return m_oBallData;
     }
 
     public void OnMouseOverDraggingOK()
