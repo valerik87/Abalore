@@ -18,6 +18,7 @@ public class BallData : MonoBehaviour {
     void Awake()
     {
         m_oPositionData = Position;
+        m_oPlayer = Player;
     }
 
     public PositionData GetPositionData()

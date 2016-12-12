@@ -133,58 +133,43 @@ public class GameLogic : SceneSingleton {
 
     public static void BallDeselectedOnNothing()
     {
-        if(m_oDraggedBall != null && m_oDraggedBall.GetComponent<BallDrag>())
+        switch (GameState)
         {
-            m_oDraggedBall.GetComponent<BallDrag>().StopDrag();
-            SetGameState(E_GameState.IDLE);
-        }
-        else
-        {
-            Log.Text("BallDeselectedOnNothing: error on saved draggedBall", E_LogContext.GAME_LOGIC);
-        }
-    }
+            case (E_GameState.DRAG):
+            case (E_GameState.PUSHING):
+                if (m_oDraggedBall != null && m_oDraggedBall.GetComponent<BallDrag>())
+                {
+                    m_oDraggedBall.GetComponent<BallDrag>().StopDrag();
 
-    public static void MouseDraggingOverTile(PositionData inTile)
-    {
-        if(CanBallMoveOnTile(inTile))
-        {
-            switch(GameState)
-            {
-                case (E_GameState.DRAG):
-                    inTile.OnMouseOverDraggingOK();
-                    break;
-                case (E_GameState.PUSHING):
-                    foreach(PositionData TileInChain in m_oPushForce.GetFriendlyChain())
+                    if(m_oPushForce != null)
                     {
-                        TileInChain.OnMouseOverDraggingOK();
+                        foreach (PositionData TileInChain in m_oPushForce.GetFriendlyChain())
+                        {
+                            TileInChain.ResetColor();
+                        }
+                        if (m_oPushForce.GetEnemyChain() != null)
+                        {
+                            foreach (PositionData TileInChain in m_oPushForce.GetEnemyChain())
+                            {
+                                TileInChain.ResetColor();
+                            }
+                        }
+                        m_oPushForce = null;
                     }
-                    break;
-                default:
-                    break;
-            }
-        }
-        else
-        {
-            switch (GameState)
-            {
-                case (E_GameState.DRAG):
-                    inTile.OnMouseOverDraggingNO();
-                    break;
-                case (E_GameState.PUSHING):
-                    foreach (PositionData TileInChain in m_oPushForce.GetFriendlyChain())
-                    {
-                        TileInChain.OnMouseOverDraggingNO();
-                    }
-                    break;
-                default:
-                    break;
-            }
-        }
-    }
 
-    public static void MouseDraggingOverBall(BallData inBall)
-    {
-        MouseDraggingOverTile(inBall.GetPositionData());
+                    SetGameState(E_GameState.IDLE);
+
+
+                }
+                else
+                {
+                    Log.Text("BallDeselectedOnNothing: error on saved draggedBall", E_LogContext.GAME_LOGIC);
+                }
+                break;
+            default:
+                break;
+        }
+                
     }
 
     public static void BallDraggingOnNothing()
@@ -192,7 +177,7 @@ public class GameLogic : SceneSingleton {
         switch (GameState)
         {
             case (E_GameState.DRAG):
-                if(m_oDraggedBall != null)
+                if (m_oDraggedBall != null)
                 {
                     m_oDraggedBall.GetPositionData().OnMouseOverDraggingOK();
                 }
@@ -209,15 +194,73 @@ public class GameLogic : SceneSingleton {
             default:
                 break;
         }
-        
+
+    }
+
+    public static void BallDraggingOverTile(PositionData inTile)
+    {
+        Log.Text("BallDraggingOverTile", E_LogContext.GAME_LOGIC);
+        if (CanBallMoveOnTile(inTile))
+        {
+            switch(GameState)
+            {
+                case (E_GameState.DRAG):
+                    inTile.OnMouseOverDraggingOK();
+                    break;
+                case (E_GameState.PUSHING):
+                    foreach(PositionData TileInChain in m_oPushForce.GetFriendlyChain())
+                    {
+                        TileInChain.OnMouseOverDraggingOK();
+                    }
+                    if(m_oPushForce.GetEnemyChain() != null)
+                    {
+                        foreach (PositionData TileInChain in m_oPushForce.GetEnemyChain())
+                        {
+                            TileInChain.OnMouseOverDraggingOK();
+                        }
+                    }
+                    break;
+                default:
+                    break;
+            }
+        }
+        else
+        {
+            switch (GameState)
+            {
+                case (E_GameState.DRAG):
+                    inTile.OnMouseOverDraggingNO();
+                    break;
+                case (E_GameState.PUSHING):
+                    if(m_oPushForce != null)
+                    {
+                        foreach (PositionData TileInChain in m_oPushForce.GetFriendlyChain())
+                        {
+                            TileInChain.OnMouseOverDraggingNO();
+                        }
+                    }
+                    m_oDraggedBall.GetPositionData().OnMouseOverDraggingNO();
+                    inTile.OnMouseOverDraggingNO();
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+
+    public static void BallDraggingOverBall(BallData inBall)
+    {
+        BallDraggingOverTile(inBall.GetPositionData());
     }
     #endregion
 
 
     #region Utility
+
     //this method will evolve checking if ball can move on a tile????
     private static bool CanBallMoveOnTile(PositionData inTile)
     {
+        Log.Text("CanBallMoveOnTile", E_LogContext.GAME_LOGIC);
         if (
             m_oDraggedBall != null &&                          //ball      exist
             m_oDraggedBall.GetPositionData() != null &&        //ballData  has a position data
@@ -242,10 +285,15 @@ public class GameLogic : SceneSingleton {
                         {
                             return CanBallMoveOnBall(inTile.GetBallOn());
                         }
+                        else
+                        {
+                            Log.Text("CanBallMoveOnTile: pushing over starting tile", E_LogContext.GAME_LOGIC);
+                        }
                     }
                     else
                     {
-                        //TODO
+                        Log.Text("TODO CanBallMoveOnTile: pushing over an empty tile", E_LogContext.GAME_LOGIC);
+                        //TODO sono in pushing ma su una tile vuota, come mi sposto?
                     }
                     break;
                 default:
@@ -272,6 +320,7 @@ public class GameLogic : SceneSingleton {
                     //was dragging but then touched another ball, so a push is started
                     //call recursively this method as is the first touch occured!
                     SetGameState(E_GameState.PUSHING);
+                    Log.Text("CanBallMoveOnBall: Touched a tile with a ball on or a ball while dragging", E_LogContext.GAME_LOGIC);
                     return CanBallMoveOnBall(inBall);
                 }
                 else
@@ -283,16 +332,19 @@ public class GameLogic : SceneSingleton {
             case E_GameState.PUSHING:
                 if (m_oDraggedBall != null && inBall != null)
                 {
+                    Log.Text("CanBallMoveOnBall: m_oDraggedBall && inBall not null", E_LogContext.GAME_LOGIC);
                     if (m_oPushForce == null)
                     {
                         //FirstTouch!
                         if(SomeTeamBall(inBall))
                         {
+                            Log.Text("CanBallMoveOnBall: Pushing start", E_LogContext.GAME_LOGIC);
                             m_oPushForce = new Assets.Data.PushForce(m_oDraggedBall.GetPositionData());
                             return m_oPushForce.ManageInput(inBall);
                         }
                         else
                         {
+                            Log.Text("CanBallMoveOnBall: Can't push an adj enemy without a friendly chain", E_LogContext.GAME_LOGIC);
                             //Touching a unfriendly ball as first is always invalid, instantiate m_oPushforce isn't required
                             return false;
                         }
@@ -301,6 +353,7 @@ public class GameLogic : SceneSingleton {
                     {
                         if(m_oPushForce != null)
                         {
+                            Log.Text("CanBallMoveOnBall: Valid input, managing it", E_LogContext.GAME_LOGIC);
                             return m_oPushForce.ManageInput(inBall);
                         }
                         else
@@ -318,6 +371,7 @@ public class GameLogic : SceneSingleton {
             default:
                 break;
         }
+        Log.Text("CanBallMoveOnBall: SafeReturn false", E_LogContext.GAME_LOGIC);
         return false;
     }
 

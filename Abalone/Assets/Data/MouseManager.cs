@@ -83,7 +83,8 @@ public class MouseManager : SceneSingleton
                     PositionData tile = ge.GetComponent<PositionData>();
                     if(tile)
                     {
-                        GameLogic.MouseDraggingOverTile(tile);
+                        Log.Text("MouseDownOn a tile", E_LogContext.MOUSE_MANAGER);
+                        GameLogic.BallDraggingOverTile(tile);
                     }
                     else
                     {
@@ -95,7 +96,8 @@ public class MouseManager : SceneSingleton
                     BallData ball = ge.GetComponent<BallData>();
                     if (ball)
                     {
-                        GameLogic.MouseDraggingOverBall(ball);
+                        Log.Text("MouseDownOn a ball", E_LogContext.MOUSE_MANAGER);
+                        GameLogic.BallDraggingOverBall(ball);
                     }
                     else
                     {
