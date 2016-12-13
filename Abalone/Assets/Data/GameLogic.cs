@@ -6,7 +6,8 @@ public enum E_GameState
 {
     IDLE,
     DRAG,
-    PUSHING
+    PUSHING,
+    RESOLVE_PUSHING
 }
 
 public class GameLogic : SceneSingleton {
@@ -40,6 +41,9 @@ public class GameLogic : SceneSingleton {
                 break;
             case E_GameState.PUSHING:
                 Log.Text("PUSHING STATE", E_LogContext.GAME_LOGIC);
+                break;
+            case E_GameState.RESOLVE_PUSHING:
+                Log.Text("RESOLVE_PUSHING", E_LogContext.GAME_LOGIC);
                 break;
             default:
                 Log.Error("GAME STATE NOT FOUND");
@@ -81,6 +85,7 @@ public class GameLogic : SceneSingleton {
         //check if dragged ball still exist and have a ballData linked to a positionData that exist
         if (CanBallMoveOnTile(inTile))
         {
+            //TODO check again
             Log.Text("Ball can be release up on position : " + inTile.name, E_LogContext.GAME_LOGIC);
             PositionData oldPositionData = m_oDraggedBall.GetPositionData();
             oldPositionData.SetBallOn(null);
@@ -107,69 +112,54 @@ public class GameLogic : SceneSingleton {
 
     public static void BallDeselectedOnBall(BallData inBall)
     {
+        Log.Text("BallDeselectedOnBall: init", E_LogContext.GAME_LOGIC);
         if (m_oDraggedBall != null && m_oDraggedBall.GetComponent<BallDrag>())
         {
             if(CanBallMoveOnBall(inBall))
             {
-
+                if(m_oPushForce != null && m_oPushForce.IPushForceValid())
+                {
+                    SetGameState(E_GameState.RESOLVE_PUSHING);
+                    m_oPushForce.ResolvePushing();
+                }
+                else
+                {
+                    Log.Text("BallDeselectedOnBall: m_oPushForce == null || !m_oPushForce.IPushForceValid()", E_LogContext.PUSH_FORCE);
+                }
             }
             else
             {
-                m_oDraggedBall.GetComponent<BallDrag>().StopDrag();
-                SetGameState(E_GameState.IDLE);
-
-                PositionData TileInBall = inBall.GetPositionData();
-                if(TileInBall)
-                {
-                    TileInBall.ResetColor();
-                }
+                Log.Text("BallDeselectedOnBall: !CanBallMoveOnBall()", E_LogContext.PUSH_FORCE);
             }
         }
         else
         {
-            Log.Text("BallDeselectedOnNothing: error on saved draggedBall", E_LogContext.GAME_LOGIC);
+            Log.Text("BallDeselectedOnBall: error on saved draggedBall", E_LogContext.GAME_LOGIC);
         }
+
+        BallDeselectedOnNothing();
     }
 
     public static void BallDeselectedOnNothing()
     {
-        switch (GameState)
+        ResetInvolvedTiles();
+        SetGameState(E_GameState.IDLE);
+    }
+
+    private static void ResetInvolvedTiles()
+    {
+        if (m_oDraggedBall != null && m_oDraggedBall.GetComponent<BallDrag>())
         {
-            case (E_GameState.DRAG):
-            case (E_GameState.PUSHING):
-                if (m_oDraggedBall != null && m_oDraggedBall.GetComponent<BallDrag>())
-                {
-                    m_oDraggedBall.GetComponent<BallDrag>().StopDrag();
-
-                    if(m_oPushForce != null)
-                    {
-                        foreach (PositionData TileInChain in m_oPushForce.GetFriendlyChain())
-                        {
-                            TileInChain.ResetColor();
-                        }
-                        if (m_oPushForce.GetEnemyChain() != null)
-                        {
-                            foreach (PositionData TileInChain in m_oPushForce.GetEnemyChain())
-                            {
-                                TileInChain.ResetColor();
-                            }
-                        }
-                        m_oPushForce = null;
-                    }
-
-                    SetGameState(E_GameState.IDLE);
-
-
-                }
-                else
-                {
-                    Log.Text("BallDeselectedOnNothing: error on saved draggedBall", E_LogContext.GAME_LOGIC);
-                }
-                break;
-            default:
-                break;
+            m_oDraggedBall.GetComponent<BallDrag>().StopDrag();
+            m_oDraggedBall.GetPositionData().ResetColor();
+            m_oDraggedBall = null;
+            
         }
-                
+        if (m_oPushForce != null)
+        {
+            m_oPushForce.ResetTilesInChains();
+            m_oPushForce = null;
+        }
     }
 
     public static void BallDraggingOnNothing()

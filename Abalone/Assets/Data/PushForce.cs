@@ -30,17 +30,35 @@ namespace Assets.Data
             m_iEnemyBallCollected = 0;
             m_bCanPushEnemyChain = false;
         }
-
         public List<PositionData> GetFriendlyChain()
         {
             return m_vChain;
         }
-
         public List<PositionData> GetEnemyChain()
         {
             return m_vEnemyChain;
         }
-        
+        public bool IPushForceValid()
+        {
+            return m_bCanPushEnemyChain;
+        }
+        public void ResetTilesInChains()
+        {
+            if (m_vChain != null)
+            {
+                foreach (PositionData TileInChain in m_vChain)
+                {
+                    TileInChain.ResetColor();
+                }
+                if (m_vEnemyChain != null)
+                {
+                    foreach (PositionData TileInChain in m_vEnemyChain)
+                    {
+                        TileInChain.ResetColor();
+                    }
+                }
+            }
+        }
 
         public bool ManageInput(BallData inNewBall)
         {
@@ -80,7 +98,7 @@ namespace Assets.Data
                 }
                 else
                 {
-                    Log.Text("Friendly ball already collected");
+                    Log.Text("Friendly ball already collected", E_LogContext.PUSH_FORCE);
                     return true;
                 }
             }
@@ -88,9 +106,27 @@ namespace Assets.Data
             {
                 Log.Text("EnemyInput", E_LogContext.PUSH_FORCE);
                 return CanPushEnemy(inNewTile);
+
+
+                if (m_vEnemyChain.Contains<PositionData>(inNewTile))
+                {
+                    //Is an enemy already collected,
+                    return m_bCanPushEnemyChain;
+                }
+                else
+                {
+                   
+                    return CanPushEnemy(inNewTile);
+                }
             }
 
             return false;
+        }
+
+        public void ResolvePushing()
+        {
+            //TODO
+            Log.Text("TODO RESOLVE PUSHING");
         }
 
         private bool IsLastSelectedFriendly(BallData inNewBall)
@@ -110,18 +146,30 @@ namespace Assets.Data
         private bool CanPushEnemy(PositionData inNewTile)
         {
             Log.Text("CanPushEnemy", E_LogContext.PUSH_FORCE);
-            if (m_vEnemyChain == null)
+            if (HasValidDirection(inNewTile))
             {
                 //Instantiate enemy chain with the first one
-                if(HasValidDirection(inNewTile))
+                if(m_vEnemyChain == null)
                 {
                     Log.Text("Found first enemy",E_LogContext.PUSH_FORCE);
                     m_vEnemyChain = new List<PositionData>();
                     m_vEnemyChain.Add(inNewTile);
                     m_oLastEnemyTouched = inNewTile;
                     ++m_iEnemyBallCollected;
-                    m_bCanPushEnemyChain = SearchEnemyInChain(inNewTile,m_oLastTouched);
+                    m_bCanPushEnemyChain = SearchEnemyInChain(inNewTile, m_oLastTouched);
                 }
+                else
+                {
+                    if(!m_vEnemyChain.Contains<PositionData>(inNewTile))
+                    {
+                        Log.Text("Found another enemy", E_LogContext.PUSH_FORCE);
+                        m_vEnemyChain.Add(inNewTile);
+                        m_oLastEnemyTouched = inNewTile;
+                        ++m_iEnemyBallCollected;
+                        m_bCanPushEnemyChain = SearchEnemyInChain(inNewTile, m_oLastTouched);
+                    }
+                }
+               
             }
             Log.Text("CanPushEnemy: return "+ m_bCanPushEnemyChain, E_LogContext.PUSH_FORCE);
             return m_bCanPushEnemyChain;
@@ -129,24 +177,28 @@ namespace Assets.Data
 
         private bool SearchEnemyInChain(PositionData inNewTile, PositionData InPrevDirection)
         {
+            Log.Text("SearchEnemyInChain: inNewTile " + inNewTile.name+ " , InPrevDirection " + InPrevDirection.name, E_LogContext.PUSH_FORCE);
             //how many enemy ball has been collected?
             PositionData oppositeTile = inNewTile.GetOppositeTileOf(InPrevDirection);
             if (oppositeTile == null)
             {
+                Log.Text("SearchEnemyInChain: inNewTile oppositeTile == null" , E_LogContext.PUSH_FORCE);
                 //Border reached
                 return FriendMoreEnemy();
             }
             else
             {
+                Log.Text("SearchEnemyInChain: oppositeTile found, is :"+ oppositeTile.name, E_LogContext.PUSH_FORCE);
                 //Is an empty tile?
                 if (oppositeTile.GetBallOn() == null)
                 {
+                    Log.Text("SearchEnemyInChain: inNewTile hasn't ball on", E_LogContext.PUSH_FORCE);
                     return FriendMoreEnemy();
                 }
                 else
                 {
                     //there is a ball over, is friendly?
-                    if (!IsLastSelectedFriendly(oppositeTile.GetBallOn()))
+                    if (IsLastSelectedFriendly(oppositeTile.GetBallOn()))
                     {
                         Log.Text("SearchEnemyInChain return false:  IsLastSelectedFriendly", E_LogContext.PUSH_FORCE);
                     }
@@ -157,7 +209,8 @@ namespace Assets.Data
                             m_vEnemyChain.Add(inNewTile);
                             m_oLastEnemyTouched = inNewTile;
                             ++m_iEnemyBallCollected;
-                            Log.Text("SearchEnemyInChain valid enemy found, searching next", E_LogContext.PUSH_FORCE);
+                            Log.Text("m_iEnemyBallCollected = "+ m_iEnemyBallCollected + 
+                                    " \nSearchEnemyInChain valid enemy found, searching next", E_LogContext.PUSH_FORCE);
                             return SearchEnemyInChain(oppositeTile, inNewTile);
                         }
                         else
