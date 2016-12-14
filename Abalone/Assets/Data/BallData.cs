@@ -29,6 +29,7 @@ public class BallData : MonoBehaviour {
     public void SetPositionData(PositionData inPosData)
     {
         m_oPositionData = inPosData;
+        Position = m_oPositionData;
     }
 
     public E_Player GetPlayer()
@@ -39,6 +40,7 @@ public class BallData : MonoBehaviour {
     public void SetPlayer(E_Player newPlayer)
     {
         m_oPlayer = newPlayer;
+        Player = newPlayer;
     }
 
 

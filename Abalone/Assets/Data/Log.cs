@@ -9,7 +9,8 @@ public enum E_LogContext
     GAME_LOGIC,
     BALL,
     TILE,
-    PUSH_FORCE
+    PUSH_FORCE,
+    LOG
 }
 
 public class Log : SceneSingleton {

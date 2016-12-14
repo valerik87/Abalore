@@ -81,33 +81,43 @@ public class GameLogic : SceneSingleton {
     
     public static void BallDeselectedOnTile(PositionData inTile)
     {
-        Log.Text(PlayerTurn.ToString() + "-> Clicked up on position : " + inTile.name, E_LogContext.GAME_LOGIC);
-        //check if dragged ball still exist and have a ballData linked to a positionData that exist
-        if (CanBallMoveOnTile(inTile))
+        if (m_oDraggedBall != null && m_oDraggedBall.GetComponent<BallDrag>())
         {
-            //TODO check again
-            Log.Text("Ball can be release up on position : " + inTile.name, E_LogContext.GAME_LOGIC);
-            PositionData oldPositionData = m_oDraggedBall.GetPositionData();
-            oldPositionData.SetBallOn(null);
-
-            inTile.SetBallOn(m_oDraggedBall);
-            inTile.GetBallOn().SetPositionData(inTile);
-
-            BallDrag drag = m_oDraggedBall.GetComponent<BallDrag>();
-            if (drag != null)
+            if (CanBallMoveOnTile(inTile))
             {
-                drag.gameObject.transform.SetParent(inTile.gameObject.transform, false);
-                drag.StopDrag();
+                switch (GameState)
+                {
+                    case (E_GameState.DRAG):
+                        MoveDraggedBallOn(inTile,true);
+                        break;
+                    case (E_GameState.PUSHING):
+                        if (m_oPushForce != null && m_oPushForce.IPushForceValid())
+                        {
+                            SetGameState(E_GameState.RESOLVE_PUSHING);
+                            m_oDraggedBall.GetPositionData().ResetColor();
+                            m_oPushForce.ResolvePushing();
+                        }
+                        else
+                        {
+                            Log.Text("BallDeselectedOnTile: m_oPushForce == null || !m_oPushForce.IPushForceValid()", E_LogContext.PUSH_FORCE);
+                        }    
+                        break;
+                    default:
+                        break;
+                }
             }
-
-            SetGameState(E_GameState.IDLE);
+            else
+            {
+                Log.Text("BallDeselectedOnTile: !CanBallMoveOnBall()", E_LogContext.PUSH_FORCE);
+            }
         }
         else
         {
-            Log.Text("Ball can't be release up on position : " + inTile.name, E_LogContext.GAME_LOGIC);
-            inTile.ResetColor();
-            BallDeselectedOnNothing();
+            Log.Text("BallDeselectedOnTile: error on saved draggedBall", E_LogContext.GAME_LOGIC);
         }
+
+        BallDeselectedOnNothing();
+        SetGameState(E_GameState.IDLE);
     }
 
     public static void BallDeselectedOnBall(BallData inBall)
@@ -120,6 +130,7 @@ public class GameLogic : SceneSingleton {
                 if(m_oPushForce != null && m_oPushForce.IPushForceValid())
                 {
                     SetGameState(E_GameState.RESOLVE_PUSHING);
+                    m_oDraggedBall.GetPositionData().ResetColor();
                     m_oPushForce.ResolvePushing();
                 }
                 else
@@ -138,12 +149,12 @@ public class GameLogic : SceneSingleton {
         }
 
         BallDeselectedOnNothing();
+        SetGameState(E_GameState.IDLE);
     }
 
     public static void BallDeselectedOnNothing()
     {
         ResetInvolvedTiles();
-        SetGameState(E_GameState.IDLE);
     }
 
     private static void ResetInvolvedTiles()
@@ -259,6 +270,7 @@ public class GameLogic : SceneSingleton {
         {
             switch (GameState)
             {
+                //TODO rivedere, sono impazziti, due bianchi su un vuoto ed un bianco su una vuota
                 case (E_GameState.DRAG):
                     //Tile is empty or it's itself
                     if (inTile.GetBallOn() == null || inTile.ID == m_oDraggedBall.GetPositionData().ID)
@@ -282,8 +294,15 @@ public class GameLogic : SceneSingleton {
                     }
                     else
                     {
-                        Log.Text("TODO CanBallMoveOnTile: pushing over an empty tile", E_LogContext.GAME_LOGIC);
-                        //TODO sono in pushing ma su una tile vuota, come mi sposto?
+                        //if tile is empty can always move
+                        if(m_oPushForce != null)
+                        {
+                             return m_oPushForce.ManageInput(inTile);
+                        }
+                        else
+                        {
+                            Log.Text("CanBallMoveOnTile: m_oPushForce == null", E_LogContext.GAME_LOGIC);
+                        }
                     }
                     break;
                 default:
@@ -368,6 +387,19 @@ public class GameLogic : SceneSingleton {
     private static bool SomeTeamBall(BallData inBall)
     {
         return inBall.Player == m_oDraggedBall.Player;
+    }
+
+    private static void MoveDraggedBallOn(PositionData inTile,bool inReset)
+    {
+        PositionData oldTile = m_oDraggedBall.GetPositionData();
+        oldTile.SetBallOn(null);
+        if (inReset)
+        {
+            oldTile.ResetColor();
+        }
+
+        m_oDraggedBall.SetPositionData(inTile);
+        inTile.SetBallOn(m_oDraggedBall);
     }
     #endregion
 }

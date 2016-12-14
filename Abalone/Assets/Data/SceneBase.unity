@@ -992,7 +992,7 @@ MonoBehaviour:
   ID: 4
   BallOn: {fileID: 0}
   LeftDown: {fileID: 9776329}
-  RightDown: {fileID: 0}
+  RightDown: {fileID: 1959659676}
   Right: {fileID: 0}
   RightUp: {fileID: 0}
   LeftUp: {fileID: 75061165}
@@ -1674,7 +1674,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 010ccb9dfc94a714aa4bcc778660439c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  LogContext: 
+  LogContext: 05000000
 --- !u!114 &1527910021
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2333,7 +2333,7 @@ MonoBehaviour:
   RightDown: {fileID: 0}
   Right: {fileID: 9776329}
   RightUp: {fileID: 0}
-  LeftUp: {fileID: 0}
+  LeftUp: {fileID: 756845444}
   Left: {fileID: 0}
 --- !u!58 &1959659677
 CircleCollider2D:

@@ -7,9 +7,7 @@ namespace Assets.Data
 {
     class PushForce
     {
-        private PositionData        m_oOriginTile;
         private PositionData        m_oLastTouched;
-        private PositionData        m_oLastEnemyTouched;
         private List<PositionData>  m_vChain;
         private List<PositionData>  m_vEnemyChain;
         private int         m_iFriendBallCollected;
@@ -20,7 +18,6 @@ namespace Assets.Data
         public PushForce(PositionData inOrigin)
         {
             m_iFriendBallCollected = 1;
-            m_oOriginTile = inOrigin;
             m_oLastTouched = inOrigin;
             m_vChain = new List<PositionData>();
             m_vChain.Add(inOrigin);
@@ -105,10 +102,7 @@ namespace Assets.Data
             else
             {
                 Log.Text("EnemyInput", E_LogContext.PUSH_FORCE);
-                return CanPushEnemy(inNewTile);
-
-
-                if (m_vEnemyChain.Contains<PositionData>(inNewTile))
+                if (m_vEnemyChain != null && m_vEnemyChain.Contains<PositionData>(inNewTile))
                 {
                     //Is an enemy already collected,
                     return m_bCanPushEnemyChain;
@@ -125,12 +119,49 @@ namespace Assets.Data
 
         public void ResolvePushing()
         {
-            //TODO
-            Log.Text("TODO RESOLVE PUSHING");
+            Log.Text("RESOLVE PUSHING",E_LogContext.LOG);
+            PrintChains();
+            List<PositionData> copyWork = new List<PositionData>();
+            if (m_vChain != null && m_vChain.Count > 0)
+            {
+                foreach (PositionData friend in m_vChain)
+                {
+                    copyWork.Add(friend);
+                }
+            }
+            if (m_vEnemyChain != null && m_vEnemyChain.Count > 0)
+            {
+                foreach (PositionData enemy in m_vEnemyChain)
+                {
+                    copyWork.Add(enemy);
+                }
+            }
+            
+            PositionData last = copyWork.Last();
+            copyWork.Remove(last);
+            if (last.GetBallOn())
+            {
+                last.GetBallOn().gameObject.SetActive(false);
+                last.SetBallOn(null);       
+            }
+            while (copyWork.Count > 0)
+            {
+                PositionData prevTile = copyWork.Last();
+                copyWork.Remove(prevTile);
+                if (prevTile != null)
+                {
+                    MoveBallFromTo(prevTile, last);
+                }
+                last = prevTile;
+            }
         }
 
         private bool IsLastSelectedFriendly(BallData inNewBall)
         {
+            if(inNewBall == null)
+            {
+                return true;
+            }
             Log.Text("IsLastSelectedFriendly: m_Owner " + (m_Owner), E_LogContext.PUSH_FORCE);
             Log.Text("IsLastSelectedFriendly: inNewBall " + inNewBall.name, E_LogContext.PUSH_FORCE);
             Log.Text("IsLastSelectedFriendly: inNewBall.GetPlayer() " + inNewBall.GetPlayer(), E_LogContext.PUSH_FORCE);
@@ -154,8 +185,8 @@ namespace Assets.Data
                     Log.Text("Found first enemy",E_LogContext.PUSH_FORCE);
                     m_vEnemyChain = new List<PositionData>();
                     m_vEnemyChain.Add(inNewTile);
-                    m_oLastEnemyTouched = inNewTile;
                     ++m_iEnemyBallCollected;
+                    m_oLastTouched = inNewTile;
                     m_bCanPushEnemyChain = SearchEnemyInChain(inNewTile, m_oLastTouched);
                 }
                 else
@@ -164,8 +195,8 @@ namespace Assets.Data
                     {
                         Log.Text("Found another enemy", E_LogContext.PUSH_FORCE);
                         m_vEnemyChain.Add(inNewTile);
-                        m_oLastEnemyTouched = inNewTile;
                         ++m_iEnemyBallCollected;
+                        m_oLastTouched = inNewTile;
                         m_bCanPushEnemyChain = SearchEnemyInChain(inNewTile, m_oLastTouched);
                     }
                 }
@@ -206,12 +237,14 @@ namespace Assets.Data
                     {
                         if (m_iEnemyBallCollected < 3)
                         {
-                            m_vEnemyChain.Add(inNewTile);
-                            m_oLastEnemyTouched = inNewTile;
-                            ++m_iEnemyBallCollected;
-                            Log.Text("m_iEnemyBallCollected = "+ m_iEnemyBallCollected + 
-                                    " \nSearchEnemyInChain valid enemy found, searching next", E_LogContext.PUSH_FORCE);
-                            return SearchEnemyInChain(oppositeTile, inNewTile);
+                            if(!m_vEnemyChain.Contains(inNewTile))
+                            {
+                                m_vEnemyChain.Add(inNewTile);
+                                ++m_iEnemyBallCollected;
+                                Log.Text("m_iEnemyBallCollected = " + m_iEnemyBallCollected +
+                                        " \nSearchEnemyInChain valid enemy found, searching next", E_LogContext.PUSH_FORCE);
+                                return SearchEnemyInChain(oppositeTile, inNewTile);
+                            }
                         }
                         else
                         {
@@ -258,6 +291,32 @@ namespace Assets.Data
         {
             Log.Text("FriendMoreEnemy: "+(m_iFriendBallCollected > m_iEnemyBallCollected), E_LogContext.PUSH_FORCE);
             return m_iFriendBallCollected > m_iEnemyBallCollected;
+        }
+
+        private void MoveBallFromTo(PositionData prevTile,PositionData last)
+        {
+            last.SetBallOn(prevTile.GetBallOn());
+            last.GetBallOn().SetPositionData(last);
+            last.GetBallOn().gameObject.transform.SetParent(last.transform);
+            last.GetBallOn().gameObject.transform.localPosition = new UnityEngine.Vector3(0,0,0);
+            prevTile.SetBallOn(null);
+        }
+
+        private void PrintChains()
+        {
+            string tiles = "FriendTiles: \n";
+            foreach (PositionData friendTile in m_vChain)
+            {
+                tiles += ("FriendTile: " + friendTile.name + "\n");
+            }
+
+            tiles += ("EnemyTiles: \n");
+
+            foreach (PositionData enemyTile in m_vEnemyChain)
+            {
+                tiles += ("EnemyTiles: " + enemyTile.name + "\n");
+            }
+            Log.Text(tiles+"\n", E_LogContext.LOG);
         }
     }
 }

@@ -34,6 +34,7 @@ public abstract class PositionData : MonoBehaviour {
     public void SetBallOn(BallData inBallData)
     {
         m_oBallData = inBallData;
+        BallOn = m_oBallData;
     }
     public BallData GetBallOn()
     {
