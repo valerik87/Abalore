@@ -13,6 +13,7 @@ namespace Assets.Data
         private int         m_iFriendBallCollected;
         private int         m_iEnemyBallCollected;
         private bool        m_bCanPushEnemyChain;
+        private bool        m_bCanPushFriends;
         private E_Player    m_Owner;
         
         public PushForce(PositionData inOrigin)
@@ -26,6 +27,7 @@ namespace Assets.Data
 
             m_iEnemyBallCollected = 0;
             m_bCanPushEnemyChain = false;
+            m_bCanPushFriends = false;
         }
         public List<PositionData> GetFriendlyChain()
         {
@@ -37,7 +39,7 @@ namespace Assets.Data
         }
         public bool IPushForceValid()
         {
-            return m_bCanPushEnemyChain;
+            return m_bCanPushEnemyChain || m_bCanPushFriends;
         }
         public void ResetTilesInChains()
         {
@@ -81,7 +83,8 @@ namespace Assets.Data
                             m_vChain.Add(inNewTile);
                             m_oLastTouched = inNewTile;
                             Log.Text("Friendly ball collected:" + m_iFriendBallCollected, E_LogContext.PUSH_FORCE);
-                            return true;
+                            m_bCanPushFriends = true;
+                            return m_bCanPushFriends;
                         }
                         else
                         {
@@ -96,7 +99,7 @@ namespace Assets.Data
                 else
                 {
                     Log.Text("Friendly ball already collected", E_LogContext.PUSH_FORCE);
-                    return true;
+                    return m_bCanPushFriends;
                 }
             }
             else
@@ -312,11 +315,14 @@ namespace Assets.Data
 
             tiles += ("EnemyTiles: \n");
 
-            foreach (PositionData enemyTile in m_vEnemyChain)
+            if(m_vEnemyChain != null && m_vEnemyChain.Count > 0)
             {
-                tiles += ("EnemyTiles: " + enemyTile.name + "\n");
+                foreach (PositionData enemyTile in m_vEnemyChain)
+                {
+                    tiles += ("EnemyTiles: " + enemyTile.name + "\n");
+                }
+                Log.Text(tiles + "\n", E_LogContext.LOG);
             }
-            Log.Text(tiles+"\n", E_LogContext.LOG);
         }
     }
 }

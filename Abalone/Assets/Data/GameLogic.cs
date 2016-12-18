@@ -347,7 +347,7 @@ public class GameLogic : SceneSingleton {
                         //FirstTouch!
                         if(SomeTeamBall(inBall))
                         {
-                            Log.Text("CanBallMoveOnBall: Pushing start", E_LogContext.GAME_LOGIC);
+                            Log.Text("CanBallMoveOnBall: Pushing start on friend", E_LogContext.GAME_LOGIC);
                             m_oPushForce = new Assets.Data.PushForce(m_oDraggedBall.GetPositionData());
                             return m_oPushForce.ManageInput(inBall);
                         }
